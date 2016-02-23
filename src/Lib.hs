@@ -16,9 +16,6 @@ import           Network.Wreq       as Wreq
 import           Text.Printf
 import           Wuss
 
-apiKey :: Text
-apiKey = ""
-
 data StartResponse =
   StartResponse {ok  :: Bool
                 ,url :: String}
@@ -62,15 +59,15 @@ instance FromJSON SlackMessage where
 startEndpoint :: String
 startEndpoint = "https://slack.com/api/rtm.start"
 
-startSession :: IO StartResponse
-startSession =
+startSession :: Text -> IO StartResponse
+startSession apiKey =
   do r <-
        getWith (defaults & param "token" .~ [apiKey]) startEndpoint >>= asJSON
      return $ r ^. responseBody
 
-runBot :: IO ()
-runBot =
-  do session <- startSession
+runBot :: Text -> IO ()
+runBot apiKey =
+  do session <- startSession apiKey
      let Just wsurl = importURL $ url session
      let Absolute urlHost = url_type wsurl
      let hostname = host urlHost
