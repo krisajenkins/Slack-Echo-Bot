@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass      #-}
 {-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RecordWildCards     #-}
@@ -19,12 +20,11 @@ import           Wuss
 data StartResponse =
   StartResponse {ok  :: Bool
                 ,url :: String}
-  deriving (Eq,Show,Generic)
-instance FromJSON StartResponse
+  deriving (Eq,Show,Generic,FromJSON)
 
 data Presence =
   Active
-  deriving (Eq,Show,Generic)
+  deriving (Eq,Show,Generic,FromJSON)
 
 data SlackMessage
   = Hello
@@ -35,8 +35,6 @@ data SlackMessage
   | PresenceChange {user     :: Text
                    ,presence :: Presence}
   deriving (Eq,Show,Generic)
-
-instance FromJSON Presence
 
 instance FromJSON SlackMessage where
   parseJSON (Object o) =
