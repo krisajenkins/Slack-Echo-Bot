@@ -6,6 +6,7 @@
 module Lib (runBot) where
 
 import           Control.Lens       hiding ((.=))
+import           Control.Monad
 import           Data.Aeson
 import qualified Data.HashMap.Lazy  as HML (lookup)
 import           Data.Monoid
@@ -70,7 +71,7 @@ runBot apiKey =
      let Absolute urlHost = url_type wsurl
      let hostname = host urlHost
      let path = url_path wsurl
-     printf "Connecting to: %s %s" hostname path
+     printf "Connecting to: %s %s\n" hostname path
      runSecureClient hostname
                      443
                      ("/" ++ path)
@@ -78,16 +79,17 @@ runBot apiKey =
 
 botApp :: Connection -> IO ()
 botApp connection =
-  do Text dataMessage <- receiveDataMessage connection
-     let msg :: Maybe SlackMessage = decode dataMessage
-     print msg
-     case msg of
-       Just (Message t ch) ->
-         sendTextData connection $
-         encode $
-         object ["id" .= (1 :: Int)
-                ,"text" .= ("I heard you say: " <> t)
-                ,"channel" .= ch
-                ,"type" .= pack "message"]
-       _ -> return ()
-     botApp connection
+  do putStrLn "====\nConnected\n===="
+     forever $
+       do Text dataMessage <- receiveDataMessage connection
+          let msg :: Maybe SlackMessage = decode dataMessage
+          print msg
+          case msg of
+            Just (Message t ch) ->
+              sendTextData connection $
+              encode $
+              object ["id" .= (1 :: Int)
+                     ,"text" .= ("I heard you say: " <> t)
+                     ,"channel" .= ch
+                     ,"type" .= pack "message"]
+            _ -> return ()
